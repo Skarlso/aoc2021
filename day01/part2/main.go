@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
+	"math"
 	"os"
 	"strconv"
 	"strings"
@@ -10,7 +11,7 @@ import (
 
 func main() {
 	if len(os.Args) < 2 {
-		fmt.Errorf("Usage: go run part1/main.go [file]")
+		fmt.Println("Usage: go run part1/main.go [file]")
 		os.Exit(1)
 	}
 	file := os.Args[1]
@@ -24,7 +25,7 @@ func main() {
 		n = append(n, i)
 	}
 	count := 0
-	prev := 9999999
+	prev := math.MaxInt
 	for i := 0; i < len(n)-2; i++ {
 		sum := n[i] + n[i+1] + n[i+2]
 		if sum > prev {
