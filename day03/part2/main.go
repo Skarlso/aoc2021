@@ -20,10 +20,6 @@ func main() {
 	oxygens := strings.Split(string(content), "\n")
 	co2s := strings.Split(string(content), "\n")
 
-	// var (
-	// oxygenGeneratorRating string
-	// co2ScrubberRating     string
-	// )
 	oxygen := filter(oxygens, func(zeros, ones int) bool {
 		return zeros > ones
 	})
