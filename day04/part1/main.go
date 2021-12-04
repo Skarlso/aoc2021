@@ -107,7 +107,8 @@ func hasWinner(boards [][][]dot) ([][]dot, bool) {
 		}
 
 		// these are 5x5 and not varring in size.
-		for col := 0; col < len(board[0]); col++ {
+		l := len(board[0])
+		for col := 0; col < l; col++ {
 			colWon := true
 			for i := 0; i < len(board); i++ {
 				if !board[i][col].marked {
