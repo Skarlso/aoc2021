@@ -8,56 +8,56 @@ import (
 
 func TestHasWinner(t *testing.T) {
 	// row winner
-	boards := [][][]dot{
+	boards := [][][]int{
 		{
 			{
-				dot{}, dot{}, dot{}, dot{},
+				1, 1, 1, 1,
 			},
 			{
-				dot{}, dot{}, dot{}, dot{},
+				1, 1, 1, 1,
 			},
 			{
-				dot{marked: true}, dot{marked: true}, dot{marked: true}, dot{marked: true},
+				-1, -1, -1, -1,
 			},
 			{
-				dot{}, dot{}, dot{}, dot{},
+				1, 1, 1, 1,
 			},
 		},
 	}
 	_, ok := hasWinner(boards)
 	assert.True(t, ok)
 	// column winner
-	boards = [][][]dot{
+	boards = [][][]int{
 		{
 			{
-				dot{marked: true}, dot{}, dot{}, dot{},
+				-1, 1, 1, 1,
 			},
 			{
-				dot{marked: true}, dot{}, dot{}, dot{},
+				-1, 1, 1, 1,
 			},
 			{
-				dot{marked: true}, dot{}, dot{}, dot{},
+				-1, 1, 1, 1,
 			},
 			{
-				dot{marked: true}, dot{}, dot{}, dot{},
+				-1, 1, 1, 1,
 			},
 		},
 	}
 	_, ok = hasWinner(boards)
 	assert.True(t, ok)
-	boards = [][][]dot{
+	boards = [][][]int{
 		{
 			{
-				dot{}, dot{}, dot{}, dot{marked: true},
+				1, 1, 1, -1,
 			},
 			{
-				dot{}, dot{}, dot{}, dot{marked: true},
+				1, 1, 1, -1,
 			},
 			{
-				dot{}, dot{}, dot{}, dot{marked: true},
+				1, 1, 1, -1,
 			},
 			{
-				dot{}, dot{}, dot{}, dot{marked: true},
+				1, 1, 1, -1,
 			},
 		},
 	}

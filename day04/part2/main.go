@@ -9,11 +9,6 @@ import (
 	"strings"
 )
 
-type dot struct {
-	value  int
-	marked bool
-}
-
 var (
 	// numbers = "7,4,9,5,11,17,23,2,0,14,21,24,10,16,13,6,15,25,12,22,18,20,8,19,3,26,1"
 
@@ -28,23 +23,23 @@ func main() {
 	content, _ := ioutil.ReadFile(name)
 	split := strings.Split(string(content), "\n")
 
-	boards := make([][][]dot, 0)
-	board := make([][]dot, 0)
+	boards := make([][][]int, 0)
+	board := make([][]int, 0)
 	for _, l := range split {
 		if l == "" {
 			boards = append(boards, board)
-			board = make([][]dot, 0)
+			board = make([][]int, 0)
 			continue
 		}
 
 		numbers := strings.Fields(l)
-		n := make([]dot, 0)
+		n := make([]int, 0)
 		for _, number := range numbers {
 			i, err := strconv.Atoi(number)
 			if err != nil {
 				log.Fatal(err)
 			}
-			n = append(n, dot{value: i, marked: false})
+			n = append(n, i)
 		}
 		board = append(board, n)
 	}
@@ -71,26 +66,26 @@ func main() {
 	}
 }
 
-func markBoards(n int, boards [][][]dot) {
+func markBoards(n int, boards [][][]int) {
 	for _, board := range boards {
 		for i := 0; i < len(board); i++ {
 			for j := 0; j < len(board[i]); j++ {
-				if board[i][j].value == n {
-					board[i][j].marked = true
+				if board[i][j] == n {
+					board[i][j] = -1
 				}
 			}
 		}
 	}
 }
 
-func hasWinner(boards [][][]dot) (int, [][]dot, bool) {
+func hasWinner(boards [][][]int) (int, [][]int, bool) {
 	// fmt.Println("board in hasWinner: ", boards)
 	for loc, board := range boards {
 		for i := 0; i < len(board); i++ {
 			// check vertically
 			rowWon := true
 			for j := 0; j < len(board[i]); j++ {
-				if !board[i][j].marked {
+				if board[i][j] != -1 {
 					rowWon = false
 					break
 				}
@@ -106,7 +101,7 @@ func hasWinner(boards [][][]dot) (int, [][]dot, bool) {
 		for col := 0; col < l; col++ {
 			colWon := true
 			for i := 0; i < len(board); i++ {
-				if !board[i][col].marked {
+				if board[i][col] != -1 {
 					colWon = false
 					break
 				}
@@ -120,12 +115,12 @@ func hasWinner(boards [][][]dot) (int, [][]dot, bool) {
 	return -1, nil, false
 }
 
-func calculateScore(n int, board [][]dot) int {
+func calculateScore(n int, board [][]int) int {
 	score := 0
 	for i := 0; i < len(board); i++ {
 		for j := 0; j < len(board[i]); j++ {
-			if !board[i][j].marked {
-				score += board[i][j].value
+			if board[i][j] != -1 {
+				score += board[i][j]
 			}
 		}
 	}
