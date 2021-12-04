@@ -9,12 +9,6 @@ import (
 	"strings"
 )
 
-var (
-	// numbers = "7,4,9,5,11,17,23,2,0,14,21,24,10,16,13,6,15,25,12,22,18,20,8,19,3,26,1"
-
-	numbers = "92,12,94,64,14,4,99,71,47,59,37,73,29,7,16,32,40,53,30,76,74,39,70,88,55,45,17,0,24,65,35,20,63,68,89,84,33,66,18,50,38,10,83,75,67,42,3,56,82,34,90,46,87,52,49,2,21,62,93,86,25,78,19,57,77,26,81,15,23,31,54,48,98,11,91,85,60,72,8,69,6,22,97,96,80,95,58,36,44,1,51,43,9,61,41,79,5,27,28,13"
-)
-
 func main() {
 	if len(os.Args) < 2 {
 		log.Fatal("Missing file name argument.")
@@ -22,19 +16,25 @@ func main() {
 	name := os.Args[1]
 	content, _ := ioutil.ReadFile(name)
 	split := strings.Split(string(content), "\n")
+	numbers := split[0]
 
-	boards := make([][][]int, 0)
-	board := make([][]int, 0)
-	for _, l := range split {
+	var (
+		boards [][][]int
+		board  [][]int
+	)
+	for i, l := range split {
+		if i < 2 {
+			continue
+		}
 		if l == "" {
 			boards = append(boards, board)
 			board = make([][]int, 0)
 			continue
 		}
 
-		numbers := strings.Fields(l)
+		nums := strings.Fields(l)
 		n := make([]int, 0)
-		for _, number := range numbers {
+		for _, number := range nums {
 			i, err := strconv.Atoi(number)
 			if err != nil {
 				log.Fatal(err)
@@ -43,6 +43,7 @@ func main() {
 		}
 		board = append(board, n)
 	}
+	// Add the last one.
 	boards = append(boards, board)
 
 	nums := make([]int, 0)
