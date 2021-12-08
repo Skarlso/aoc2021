@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -32,36 +33,44 @@ func main() {
 		input := strings.Split(string(line), " | ")
 		signalPatterns := input[0]
 		outputValue := input[1]
-		// find 1, 4, 7, 8
+
+		var (
+			sortedPatterns []string
+			sortedOutput   []string
+		)
+
 		for _, v := range strings.Split(signalPatterns, " ") {
+			s := []rune(v)
+			sort.Slice(s, func(i int, j int) bool { return s[i] < s[j] })
+			sortedPatterns = append(sortedPatterns, string(s))
+		}
+
+		for _, v := range strings.Split(outputValue, " ") {
+			s := []rune(v)
+			sort.Slice(s, func(i int, j int) bool { return s[i] < s[j] })
+			sortedOutput = append(sortedOutput, string(s))
+		}
+
+		for _, v := range sortedPatterns {
 			if num, ok := digitsToSegments[len(v)]; ok {
 				numberToSegment[num] = v
-				// TODO: Sort them all, so I can do contains for multiple characters.
 				segmentToNumber[v] = num
 			}
 		}
-		// determine the rest
-		findNumberMappings(strings.Split(signalPatterns, " "))
+		findNumberMappings(sortedPatterns)
 
-		num := gatherOutput(strings.Split(outputValue, " "))
+		num := gatherOutput(sortedOutput)
 		sum += num
-
-		// reset for next round
-		numberToSegment = make(map[string]string)
-		segmentToNumber = make(map[string]string)
 	}
 
 	fmt.Println("sum: ", sum)
 }
 
 func gatherOutput(s []string) int {
-	fmt.Println("output: ", s)
-	fmt.Println("segments: ", segmentToNumber)
 	var result string
 	for _, v := range s {
 		result += segmentToNumber[v]
 	}
-	fmt.Println(result)
 	i, _ := strconv.Atoi(result)
 	return i
 }
@@ -99,7 +108,6 @@ func findNumberMappings(s []string) {
 		topOne = string(numberToSegment["1"][0])
 		bottomOne = string(numberToSegment["1"][1])
 	}
-	fmt.Println("top, bottom", topOne, bottomOne)
 
 	// find 2, 5
 	for _, v := range s {
