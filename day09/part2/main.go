@@ -7,6 +7,8 @@ import (
 	"os"
 	"sort"
 	"strings"
+
+	"github.com/fatih/color"
 )
 
 type point struct {
@@ -62,12 +64,17 @@ func main() {
 		}
 	}
 	sizes := make([]int, 0)
+	mark := make(map[point]struct{})
 	for _, p := range basins {
-		sizes = append(sizes, calculateBasinSize(p, grid))
+		points := calculateBasinSize(p, grid)
+		for p := range points {
+			mark[p] = struct{}{}
+		}
+		sizes = append(sizes, len(points))
 	}
 	sort.Ints(sizes)
 	l := len(sizes)
-	fmt.Println(sizes)
+	display(grid, mark)
 	fmt.Println("sum: ", sizes[l-1]*sizes[l-2]*sizes[l-3])
 }
 
@@ -77,7 +84,7 @@ func neighbors(p point, grid [][]int) []point {
 	for _, d := range directions {
 		np := point{x: p.x + d.x, y: p.y + d.y}
 		if np.x >= 0 && np.x < len(grid[p.y]) && np.y >= 0 && np.y < len(grid) {
-			if grid[np.y][np.x] == grid[p.y][p.x]+1 && grid[np.y][np.x] != 9 {
+			if grid[np.y][np.x] > grid[p.y][p.x] && grid[np.y][np.x] != 9 {
 				result = append(result, np)
 			}
 		}
@@ -86,7 +93,7 @@ func neighbors(p point, grid [][]int) []point {
 	return result
 }
 
-func calculateBasinSize(p point, grid [][]int) int {
+func calculateBasinSize(p point, grid [][]int) map[point]struct{} {
 	start := p
 	seen := map[point]struct{}{
 		start: {},
@@ -102,19 +109,24 @@ func calculateBasinSize(p point, grid [][]int) int {
 			}
 		}
 	}
-	fmt.Println(seen)
-	fmt.Println("values: ")
-	for k := range seen {
-		fmt.Printf("%+v, ", grid[k.y][k.x])
-	}
-	fmt.Println()
-	return len(seen)
+	// fmt.Println(seen)
+	// fmt.Println("values: ")
+	// for k := range seen {
+	// fmt.Printf("%+v, ", grid[k.y][k.x])
+	// }
+	// fmt.Println()
+	return seen
 }
 
-func display(grid [][]int) {
-	for _, v := range grid {
-		for _, row := range v {
-			fmt.Print(".", row)
+func display(grid [][]int, mark map[point]struct{}) {
+	red := color.New(color.FgRed).PrintfFunc()
+	for y, v := range grid {
+		for x, row := range v {
+			if _, ok := mark[point{x: x, y: y}]; ok {
+				red("%d", row)
+			} else {
+				fmt.Print(row)
+			}
 		}
 		fmt.Println()
 	}
