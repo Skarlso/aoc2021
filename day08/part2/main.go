@@ -27,7 +27,11 @@ func main() {
 	}
 	name := os.Args[1]
 	content, _ := ioutil.ReadFile(name)
+	sum := doTheThing(content)
+	fmt.Println("sum: ", sum)
+}
 
+func doTheThing(content []byte) int {
 	sum := 0
 	for _, line := range strings.Split(string(content), "\n") {
 		input := strings.Split(string(line), " | ")
@@ -62,8 +66,7 @@ func main() {
 		num := gatherOutput(sortedOutput)
 		sum += num
 	}
-
-	fmt.Println("sum: ", sum)
+	return sum
 }
 
 func gatherOutput(s []string) int {
