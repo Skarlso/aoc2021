@@ -9,8 +9,8 @@ import (
 )
 
 type octopus struct {
-	energy      int
-	currentStep int
+	energy  int
+	flashed bool
 }
 
 type point struct {
@@ -42,8 +42,7 @@ func main() {
 		for j, c := range line {
 			n := c - '0'
 			grid[i][j] = &octopus{
-				currentStep: 0,
-				energy:      int(n),
+				energy: int(n),
 			}
 		}
 	}
@@ -62,7 +61,7 @@ func doTheThing(grid [10][10]*octopus) {
 				// we only ++ if the octopus is on the same step.
 				// if it reset, it will be on the next step anyways.
 				// if it's 0 and not on the same step it's resting.
-				if grid[y][x].currentStep == i {
+				if !grid[y][x].flashed {
 					grid[y][x].energy++
 					if grid[y][x].energy == 10 {
 						flash(point{x: x, y: y}, i, grid)
@@ -70,13 +69,11 @@ func doTheThing(grid [10][10]*octopus) {
 				}
 			}
 		}
-		// reset the steps of those which did not flash.
-		// this is separate, because they could be increased outside of the main increase
-		// until they flash.
+		// reset flashed
 		for y := 0; y < len(grid); y++ {
 			for x := 0; x < len(grid[y]); x++ {
-				if grid[y][x].currentStep == i {
-					grid[y][x].currentStep++
+				if grid[y][x].flashed {
+					grid[y][x].flashed = false
 				}
 			}
 		}
@@ -88,12 +85,12 @@ func flash(currentPoint point, currentStep int, grid [10][10]*octopus) {
 	// flash the current octopus
 	flashCount++
 	grid[currentPoint.y][currentPoint.x].energy = 0
-	grid[currentPoint.y][currentPoint.x].currentStep++
+	grid[currentPoint.y][currentPoint.x].flashed = true
 	// select neighbors and increase their energy
 	for _, d := range directions {
 		np := point{x: currentPoint.x + d.x, y: currentPoint.y + d.y}
 		if np.x >= 0 && np.x < len(grid[currentPoint.y]) && np.y >= 0 && np.y < len(grid) {
-			if grid[np.y][np.x].currentStep == currentStep {
+			if !grid[np.y][np.x].flashed {
 				grid[np.y][np.x].energy++
 				if grid[np.y][np.x].energy == 10 {
 					flash(np, currentStep, grid)

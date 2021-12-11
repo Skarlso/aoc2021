@@ -15,8 +15,7 @@ func TestDoTheThing(t *testing.T) {
 		for j, c := range line {
 			n := c - '0'
 			grid[i][j] = &octopus{
-				currentStep: 0,
-				energy:      int(n),
+				energy: int(n),
 			}
 		}
 	}
