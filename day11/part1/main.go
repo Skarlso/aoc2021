@@ -11,7 +11,6 @@ import (
 type octopus struct {
 	energy      int
 	currentStep int
-	flashed     bool // how do I reset this?
 }
 
 type point struct {
@@ -45,7 +44,6 @@ func main() {
 			grid[i][j] = &octopus{
 				currentStep: 0,
 				energy:      int(n),
-				flashed:     false,
 			}
 		}
 	}
@@ -72,6 +70,9 @@ func doTheThing(grid [10][10]*octopus) {
 				}
 			}
 		}
+		// reset the steps of those which did not flash.
+		// this is separate, because they could be increased outside of the main increase
+		// until they flash.
 		for y := 0; y < len(grid); y++ {
 			for x := 0; x < len(grid[y]); x++ {
 				if grid[y][x].currentStep == i {
@@ -79,19 +80,8 @@ func doTheThing(grid [10][10]*octopus) {
 				}
 			}
 		}
-		// fmt.Println("==========")
-		// display(grid)
 	}
 	fmt.Println("total flash counts: ", flashCount)
-}
-
-func display(grid [10][10]*octopus) {
-	for _, v := range grid {
-		for _, c := range v {
-			fmt.Print(c.energy)
-		}
-		fmt.Println()
-	}
 }
 
 func flash(currentPoint point, currentStep int, grid [10][10]*octopus) {

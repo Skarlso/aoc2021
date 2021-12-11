@@ -17,7 +17,6 @@ func TestDoTheThing(t *testing.T) {
 			grid[i][j] = &octopus{
 				currentStep: 0,
 				energy:      int(n),
-				flashed:     false,
 			}
 		}
 	}

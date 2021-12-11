@@ -11,7 +11,6 @@ import (
 type octopus struct {
 	energy      int
 	currentStep int
-	flashed     bool // how do I reset this?
 }
 
 type point struct {
@@ -45,7 +44,6 @@ func main() {
 			grid[i][j] = &octopus{
 				currentStep: 0,
 				energy:      int(n),
-				flashed:     false,
 			}
 		}
 	}
