@@ -1,119 +1,80 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
-	"io/ioutil"
-	"log"
 	"os"
 	"strings"
-	"unicode"
 )
 
-type node struct {
-	connections []*node
-	value       string
-}
+var mapPath = make(map[string][]string)
 
 func main() {
-	if len(os.Args) < 2 {
-		log.Fatal("Missing file name argument.")
+	file, err := os.Open("../test1.txt")
+	if err != nil {
+		fmt.Errorf("error while opening file: %s", err)
 	}
-	name := os.Args[1]
-	content, _ := ioutil.ReadFile(name)
-	input := strings.Split(string(content), "\n")
-	caves := make(map[string]*node)
-	smallCaves := make(map[string]struct{})
-	for _, line := range input {
-		var (
-			a, b string
-		)
-		split := strings.Split(line, "-")
-		a = split[0]
-		b = split[1]
-		if isLower(a) {
-			smallCaves[a] = struct{}{}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		points := strings.Split(scanner.Text(), "-")
+		if points[0] == "end" {
+			mapPath[points[1]] = append(mapPath[points[1]], points[0])
+			continue
 		}
-		if isLower(b) {
-			smallCaves[b] = struct{}{}
+		if points[1] == "end" {
+			mapPath[points[0]] = append(mapPath[points[0]], points[1])
+			continue
 		}
-		if _, ok := caves[a]; ok {
-			if _, ok := caves[b]; ok {
-				caves[a].connections = append(caves[a].connections, caves[b])
-				caves[b].connections = append(caves[b].connections, caves[a])
-			} else {
-				n := &node{value: b, connections: []*node{caves[a]}}
-				caves[a].connections = append(caves[a].connections, n)
-				caves[b] = n
-			}
-		} else {
-			an := &node{
-				value: a,
-			}
-			if _, ok := caves[b]; ok {
-				an.connections = append(an.connections, caves[b])
-				caves[b].connections = append(caves[b].connections, an)
-			} else {
-				bn := &node{
-					value: b,
-				}
-				an.connections = append(an.connections, bn)
-				bn.connections = append(bn.connections, an)
-				caves[b] = bn
-			}
-			caves[a] = an
+		if points[0] == "start" {
+			mapPath[points[0]] = append(mapPath[points[0]], points[1])
+			continue
 		}
+		if points[1] == "start" {
+			mapPath[points[1]] = append(mapPath[points[1]], points[0])
+			continue
+		}
+		mapPath[points[1]] = append(mapPath[points[1]], points[0])
+		mapPath[points[0]] = append(mapPath[points[0]], points[1])
+	}
+	if err := scanner.Err(); err != nil {
+		fmt.Errorf("scanner error: %s", err)
 	}
 
-	// fmt.Println(smallCaves)
-	for k := range smallCaves {
-		if k != "start" && k != "end" {
-			path := make([]string, 0)
-			seen := make(map[string]struct{})
-			seenTwice := map[string]int{k: 0}
-			dfs(caves["start"], path, seenTwice, seen)
-		}
-	}
-	fmt.Println("len: ", len(paths))
-	// fmt.Println("len: ", paths)
-	for v := range paths {
-		fmt.Println(v)
-	}
+	fmt.Printf("First part: there are %d paths\n", len(findAllPathes("start", map[string]int{}, true)))
+	fmt.Printf("Second part: there are %d paths\n", len(findAllPathes("start", map[string]int{}, false)))
 }
 
-// use a map of joined strings
-var paths = make(map[string]struct{})
-
-// var paths = make([][]string, 0)
-
-func dfs(curr *node, path []string, seenTwice map[string]int, seen map[string]struct{}) {
-	if isLower(curr.value) {
-		if v, ok := seenTwice[curr.value]; ok && v > 0 {
-			seen[curr.value] = struct{}{}
-		} else if !ok {
-			seen[curr.value] = struct{}{}
-		} else if ok {
-			seenTwice[curr.value]++
+func findAllPathes(start string, alreadyDone map[string]int, hasVisitSmallCaveTwice bool) [][]string {
+	possiblePaths := mapPath[start]
+	var result [][]string
+	for _, p := range possiblePaths {
+		if p == "end" {
+			result = append(result, []string{"end"})
+			continue
 		}
-	}
-	path = append(path, curr.value)
-	if curr.value == "end" {
-		paths[strings.Join(path, ",")] = struct{}{}
-		// paths = append(paths, path)
-	} else {
-		for _, next := range curr.connections {
-			if _, ok := seen[next.value]; !ok {
-				dfs(next, path, seenTwice, seen)
+
+		hasVisited := hasVisitSmallCaveTwice
+		if strings.ToUpper(p) != p && alreadyDone[p] >= 1 {
+			if !hasVisited {
+				hasVisited = true
+			} else {
+				continue
 			}
 		}
-	}
-	delete(seen, curr.value)
-}
 
-func isLower(s string) bool {
-	for _, r := range s {
-		if !unicode.IsLower(r) && unicode.IsLetter(r) {
-			return false
+		newMap := make(map[string]int)
+		for k, v := range alreadyDone {
+			newMap[k] = v
+		}
+		newMap[p]++
+
+		r := findAllPathes(p, newMap, hasVisited)
+		for _, v := range r {
+			n := []string{p}
+			result = append(result, append(n, v...))
 		}
 	}
-	return true
+	return result
 }
