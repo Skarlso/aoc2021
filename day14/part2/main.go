@@ -45,9 +45,9 @@ func main() {
 
 	fmt.Println(trackPairs)
 
-	counts := map[rune]int{}
+	counts := map[string]int{}
 	for k, v := range trackPairs {
-		counts[rune(k[0])] += v
+		counts[string(k[0])] += v
 	}
 	fmt.Println(counts)
 
