@@ -6,12 +6,12 @@ import (
 	"log"
 	"os"
 	"strings"
-	"unicode"
 )
 
-type node struct {
-	connections []*node
-	value       string
+type cave struct {
+	pos       string
+	pathSoFar []string
+	twice     bool
 }
 
 func main() {
@@ -21,7 +21,7 @@ func main() {
 	name := os.Args[1]
 	content, _ := ioutil.ReadFile(name)
 	input := strings.Split(string(content), "\n")
-	caves := make(map[string]*node)
+	caves := make(map[string][]string)
 	for _, line := range input {
 		var (
 			a, b string
@@ -29,64 +29,52 @@ func main() {
 		split := strings.Split(line, "-")
 		a = split[0]
 		b = split[1]
-		if _, ok := caves[a]; ok {
-			if _, ok := caves[b]; ok {
-				caves[a].connections = append(caves[a].connections, caves[b])
-				caves[b].connections = append(caves[b].connections, caves[a])
-			} else {
-				n := &node{value: b, connections: []*node{caves[a]}}
-				caves[a].connections = append(caves[a].connections, n)
-				caves[b] = n
+		caves[a] = append(caves[a], b)
+		caves[b] = append(caves[b], a)
+	}
+
+	seen := func(a string, b []string) bool {
+		for _, v := range b {
+			if v == a {
+				return true
 			}
-		} else {
-			an := &node{
-				value: a,
-			}
-			if _, ok := caves[b]; ok {
-				an.connections = append(an.connections, caves[b])
-				caves[b].connections = append(caves[b].connections, an)
-			} else {
-				bn := &node{
-					value: b,
+		}
+		return false
+	}
+	count := 0
+	start := cave{
+		pos:       "start",
+		pathSoFar: []string{"start"},
+	}
+	queue := []cave{start}
+	var current cave
+	for len(queue) > 0 {
+		current, queue = queue[0], queue[1:]
+		if current.pos == "end" {
+			count++
+			continue
+		}
+		for _, next := range caves[current.pos] {
+			seenThisCaveBefore := seen(next, current.pathSoFar)
+			if !seenThisCaveBefore {
+				path := make([]string, 0)
+				path = append(path, current.pathSoFar...)
+				if strings.ToLower(next) == next {
+					path = append(path, next)
 				}
-				an.connections = append(an.connections, bn)
-				bn.connections = append(bn.connections, an)
-				caves[b] = bn
-			}
-			caves[a] = an
-		}
-	}
-
-	path := make([]string, 0)
-	seen := make(map[string]struct{})
-	dfs(caves["start"], path, seen)
-	fmt.Println(len(paths))
-}
-
-var paths = make([][]string, 0)
-
-func dfs(curr *node, path []string, seen map[string]struct{}) {
-	if isLower(curr.value) {
-		seen[curr.value] = struct{}{}
-	}
-	path = append(path, curr.value)
-	if curr.value == "end" {
-		paths = append(paths, path)
-	} else {
-		for _, next := range curr.connections {
-			if _, ok := seen[next.value]; !ok {
-				dfs(next, path, seen)
+				queue = append(queue, cave{
+					pos:       next,
+					pathSoFar: path,
+					twice:     current.twice,
+				})
+			} else if seenThisCaveBefore && !current.twice && !seen(next, []string{"start", "end"}) {
+				queue = append(queue, cave{
+					pos:       next,
+					pathSoFar: current.pathSoFar,
+					twice:     true,
+				})
 			}
 		}
 	}
-	delete(seen, curr.value)
-}
-
-func isLower(s string) bool {
-	for _, r := range s {
-		if !unicode.IsLower(r) && unicode.IsLetter(r) {
-			return false
-		}
-	}
-	return true
+	fmt.Println(count)
 }
