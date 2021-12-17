@@ -9,7 +9,7 @@ import (
 )
 
 type cave struct {
-	pos       string
+	value     string
 	pathSoFar []string
 	twice     bool
 }
@@ -43,18 +43,18 @@ func main() {
 	}
 	count := 0
 	start := cave{
-		pos:       "start",
+		value:     "start",
 		pathSoFar: []string{"start"},
 	}
 	queue := []cave{start}
 	var current cave
 	for len(queue) > 0 {
 		current, queue = queue[0], queue[1:]
-		if current.pos == "end" {
+		if current.value == "end" {
 			count++
 			continue
 		}
-		for _, next := range caves[current.pos] {
+		for _, next := range caves[current.value] {
 			seenThisCaveBefore := seen(next, current.pathSoFar)
 			if !seenThisCaveBefore {
 				path := make([]string, 0)
@@ -63,13 +63,13 @@ func main() {
 					path = append(path, next)
 				}
 				queue = append(queue, cave{
-					pos:       next,
+					value:     next,
 					pathSoFar: path,
 					twice:     current.twice,
 				})
 			} else if seenThisCaveBefore && !current.twice && !seen(next, []string{"start", "end"}) {
 				queue = append(queue, cave{
-					pos:       next,
+					value:     next,
 					pathSoFar: current.pathSoFar,
 					twice:     true,
 				})
